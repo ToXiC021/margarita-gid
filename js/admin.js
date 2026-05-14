@@ -76,29 +76,29 @@ window.addEventListener('load', () => {
 function initAdminMode() {
   document.getElementById('adminToggle')?.classList.remove('hidden');
   document.querySelectorAll('.admin-controls').forEach(c => c.classList.remove('hidden'));
-  
+
   const profileEditBtn = document.querySelector('[data-block="profile"] .btn-edit');
   const aboutEditBtn = document.querySelector('[data-block="about"] .btn-edit');
   if (profileEditBtn) profileEditBtn.addEventListener('click', () => enableEditing('profile'));
   if (aboutEditBtn) aboutEditBtn.addEventListener('click', () => enableEditing('about'));
-  
+
   const diplomasAddBtn = document.querySelector('[data-block="diplomas"] .btn-add');
   const servicesAddBtn = document.querySelector('[data-block="services"] .btn-add');
   if (diplomasAddBtn) diplomasAddBtn.addEventListener('click', addDiploma);
   if (servicesAddBtn) servicesAddBtn.addEventListener('click', addService);
-  
+
   document.querySelectorAll('.btn-save').forEach(btn => {
     btn.removeEventListener('click', saveHandler);
     btn.addEventListener('click', saveHandler);
   });
-  
+
   function saveHandler(e) {
     const controls = e.target.closest('.admin-controls');
     if (!controls) return;
     const block = controls.dataset.block;
     saveChanges(block);
   }
-  
+
   document.addEventListener('click', (e) => {
     if (e.target.classList.contains('btn-delete')) {
       const item = e.target.closest('[data-id]');
@@ -107,7 +107,7 @@ function initAdminMode() {
       if (id && confirm('Удалить?')) deleteItem(table, id);
     }
   });
-  
+
   setupProfilePhotoUpload();
   refreshDeleteButtons();
   initReviewForm();
@@ -270,7 +270,7 @@ function refreshDeleteButtons() {
         item.remove();
       } catch (err) { alert('❌ Ошибка: ' + err.message); }
     };
-    item.appendChild(btn);
+    item.appendChild(btn);8
   });
   document.querySelectorAll('#servicesList .service-item:not(.has-del)').forEach(item => {
     item.classList.add('has-del');
@@ -405,7 +405,7 @@ async function saveDiplomas() {
     const title = item.querySelector('.diploma-title')?.value?.trim() || null;
     if (!imageUrl || imageUrl.length < 50) continue;
     const data = { image_url: imageUrl, title, sort_order: 0 };
-    const { error } = isNew 
+    const { error } = isNew
       ? await currentSupabase.from('diplomas').insert([data])
       : await currentSupabase.from('diplomas').update(data).eq('id', id);
     if (error) throw error;
@@ -473,7 +473,7 @@ function initReviewForm() {
     };
     setRating(5);
   }
-  
+
   const photoInput = document.getElementById('newReviewPhotos');
   const photoContainer = document.getElementById('newReviewPhotosPrev');
   if (photoInput && photoContainer) {
@@ -505,7 +505,7 @@ function initReviewForm() {
       e.target.value = '';
     });
   }
-  
+
   const addBtn = document.querySelector('[data-block="reviews"] .btn-add');
   const form = document.getElementById('reviewFormContainer');
   if (addBtn && form) {
@@ -548,23 +548,23 @@ async function refreshReviewsList() {
       .select('*')
       .order('date', { ascending: false, nullsLast: true });
     if (error) throw error;
-    
+
     window.allReviews = revs || [];
     const currentPage = window.currentReviewsPage || 1;
     const REVIEWS_PER_PAGE = 10;
     const start = (currentPage - 1) * REVIEWS_PER_PAGE;
     const end = start + REVIEWS_PER_PAGE;
     const pageReviews = window.allReviews.slice(start, end);
-    
+
     const container = document.getElementById('reviewsList');
     if (!container) return;
-    
+
     if (pageReviews.length === 0) {
       container.innerHTML = '<p class="loading">Пока нет отзывов</p>';
       document.getElementById('reviewsPagination').innerHTML = '';
       return;
     }
-    
+
     container.innerHTML = pageReviews.map(function(r) {
       var dt = r.date ? new Date(r.date).toLocaleDateString('ru-RU') : '';
       var stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
@@ -591,7 +591,7 @@ async function refreshReviewsList() {
         photosHtml +
       '</div>';
     }).join('');
-    
+
     // Пагинация
     const pCont = document.getElementById('reviewsPagination');
     if (pCont) {
@@ -617,7 +617,7 @@ async function refreshReviewsList() {
         };
       });
     }
-    
+
     // Перепривязываем кнопки удаления
     if (typeof window.attachReviewDeleteButtons === 'function') {
       window.attachReviewDeleteButtons();
@@ -646,17 +646,17 @@ window.attachReviewDeleteButtons = function() {
           .from('reviews')
           .delete({ count: 'exact' })
           .eq('id', id);
-        
+
         if (error) {
           console.error('Ошибка Supabase:', error);
           throw new Error(`Ошибка БД: ${error.message}. Код: ${error.code}`);
         }
-        
+
         // Если count === 0, значит запись не найдена или нет прав
         if (count === 0) {
           throw new Error('Запись не найдена или недостаточно прав для удаления. Проверьте политики безопасности Supabase (RLS).');
         }
-        
+
         // Успешно удалили — обновляем список
         await refreshReviewsList();
         alert('✅ Отзыв удалён');
@@ -709,3 +709,5 @@ window.submitNewReview = async function() {
     alert('❌ Ошибка: ' + e.message);
   }
 };
+
+

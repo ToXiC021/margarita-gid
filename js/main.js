@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // === ПРОФИЛЬ ===
   try {
-    var { data: profile, error: pErr } = await db.from('profile').select('*').eq('id', 1).single();
+    var {  profile, error: pErr } = await db.from('profile').select('*').eq('id', 1).single();
     if (!pErr && profile) {
       console.log('✅ Профиль:', profile);
       var set = function(id, val) { var el = document.getElementById(id); if (el) el.textContent = val || '-'; };
@@ -31,10 +31,10 @@ document.addEventListener('DOMContentLoaded', async function() {
       set('aboutWorkplace', profile.workplace);
     }
   } catch(e) { console.error('❌ Профиль:', e); }
-  
+
   // === ДИПЛОМЫ ===
   try {
-    var { data: dipl, error: dErr } = await db.from('diplomas').select('*').order('sort_order');
+    var {  dipl, error: dErr } = await db.from('diplomas').select('*').order('sort_order');
     var dCont = document.getElementById('diplomasList');
     if (dCont) {
       if (!dErr && dipl && dipl.length > 0) {
@@ -47,10 +47,10 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
     }
   } catch(e) { console.error('❌ Дипломы:', e); }
-  
+
   // === УСЛУГИ ===
   try {
-    var { data: serv, error: sErr } = await db.from('services').select('*').order('sort_order');
+    var {  serv, error: sErr } = await db.from('services').select('*').order('sort_order');
     var sCont = document.getElementById('servicesList');
     if (sCont) {
       if (!sErr && serv && serv.length > 0) {
@@ -64,72 +64,70 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
     }
   } catch(e) { console.error('❌ Услуги:', e); }
-  
+
   // === ОТЗЫВЫ С ПАГИНАЦИЕЙ ===
   var currentPage = 1;
   var REVIEWS_PER_PAGE = 10;
   var allReviews = [];
-  
+
   try {
-    var { data: revs, error: rErr } = await db.from('reviews')
+    var {  revs, error: rErr } = await db.from('reviews')
       .select('*')
       .order('date', { ascending: false, nullsLast: true });
-    
+
     var rCont = document.getElementById('reviewsList');
     var pCont = document.getElementById('reviewsPagination');
-    
+
     if (!rErr && revs) {
       allReviews = revs;
       console.log('✅ Загружено отзывов:', allReviews.length);
-      
+
       // Отрисовка страницы отзывов
       function showReviewsPage(page) {
-  var start = (page - 1) * REVIEWS_PER_PAGE;
-  var end = start + REVIEWS_PER_PAGE;
-  var pageReviews = allReviews.slice(start, end);
-  var container = document.getElementById('reviewsList');
-  if (!container) return;
-  
-  if (pageReviews.length === 0) {
-    container.innerHTML = '<p class="loading">Пока нет отзывов</p>';
-    return;
-  }
-  
-  container.innerHTML = pageReviews.map(function(r) {
-    var dt = r.date ? new Date(r.date).toLocaleDateString('ru-RU') : '';
-    var stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
-    
-    // Фотографии
-    var photosHtml = '';
-    if (r.photos && Array.isArray(r.photos) && r.photos.length > 0) {
-      photosHtml = '<div class="review-photos">' +
-        r.photos.slice(0, 4).map(function(p) {
-          return '<img src="'+p+'" class="review-photo" onclick="window.open(this.src)">';
-        }).join('') +
-        (r.photos.length > 4 ? '<span style="font-size:0.8rem; color:var(--color-gray); align-self:center;">+ ещё ' + (r.photos.length - 4) + '</span>' : '') +
-        '</div>';
-    } else if (r.photo_url) {
-      photosHtml = '<img src="'+r.photo_url+'" class="review-photo" onclick="window.open(this.src)">';
-    }
-    
-    return '<div class="review-item" data-id="'+r.id+'">' +
-      '<div class="review-header">' +
-        '<div>' +
-          '<span class="review-author">' + (r.author_name || 'Аноним') + '</span>' +
-          (dt ? '<span class="review-date"> • ' + dt + '</span>' : '') +
-        '</div>' +
-      '</div>' +
-      '<div class="review-rating">' + stars + '</div>' +
-      '<p class="review-text">' + (r.text || '') + '</p>' +
-      photosHtml +
-    '</div>';
-  }).join('');
-  
-  // Кнопки удаления для админа
-  if (window.appConfig?.ADMIN_TOKEN && typeof window.attachReviewDeleteButtons === 'function') {
-    setTimeout(function() { window.attachReviewDeleteButtons(); }, 100);
-  }
-}
+        var start = (page - 1) * REVIEWS_PER_PAGE;
+        var end = start + REVIEWS_PER_PAGE;
+        var pageReviews = allReviews.slice(start, end);
+        var container = document.getElementById('reviewsList');
+        if (!container) return;
+
+        if (pageReviews.length === 0) {
+          container.innerHTML = '<p class="loading">Пока нет отзывов</p>';
+          return;
+        }
+
+        container.innerHTML = pageReviews.map(function(r) {
+          var dt = r.date ? new Date(r.date).toLocaleDateString('ru-RU') : '';
+          var st = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
+
+          // === ФОТОГРАФИИ (массив или строка) ===
+          var photosHtml = '';
+          if (r.photos && Array.isArray(r.photos) && r.photos.length > 0) {
+            photosHtml = '<div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">' +
+              r.photos.slice(0, 4).map(function(p) {
+                return '<img src="'+p+'" style="max-width:80px; max-height:80px; border-radius:6px; object-fit:cover; cursor:pointer;" onclick="window.open(this.src)">';
+              }).join('') +
+              (r.photos.length > 4 ? '<span style="font-size:0.8rem; color:#666; align-self:center;">+ ещё ' + (r.photos.length - 4) + '</span>' : '') +
+              '</div>';
+          } else if (r.photo_url) {
+            photosHtml = '<img src="'+r.photo_url+'" style="max-width:200px; max-height:150px; margin-top:0.5rem; border-radius:8px; cursor:pointer;" onclick="window.open(this.src)">';
+          }
+
+          return '<div class="review-item" data-id="'+r.id+'">' +
+            '<div class="review-header">' +
+              '<span class="review-author">'+(r.author_name||'')+'</span>' +
+              '<span class="review-rating">'+st+'</span>' +
+              (dt ? '<span class="review-date"> • '+dt+'</span>' : '') +
+            '</div>' +
+            '<p class="review-text">'+(r.text||'')+'</p>' +
+            photosHtml +
+          '</div>';
+        }).join('');
+
+        // Кнопки удаления для админа
+        if (window.appConfig?.ADMIN_TOKEN && typeof window.attachReviewDeleteButtons === 'function') {
+          setTimeout(function() { window.attachReviewDeleteButtons(); }, 100);
+        }
+      }
       
       // Отрисовка пагинации
       function showPagination() {
