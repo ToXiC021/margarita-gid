@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "margarita-gid",
+  "name": "yandex-sync-worker",
   "compatibility_date": "2026-05-14",
   "observability": {
     "enabled": true
