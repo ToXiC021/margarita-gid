@@ -22,3 +22,22 @@ window.appConfig = {
   SYNC_WORKER_URL: 'https://yandex-sync-worker.margarita-site-gid.workers.dev',
   ADMIN_TOKEN: 'g3n09g43WG343gjEJg'
 };
+
+try {
+  if (typeof window.supabase === 'undefined') {
+    console.error('❌ Supabase CDN не загрузился');
+  } else {
+    window.appConfig = {
+      supabase: window.supabase.createClient(
+        'https://zqyfbndewygcxmxrxcbe.supabase.co',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxeWZibmRld3lnY3hteHJ4Y2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMTIyMTcsImV4cCI6MjA5MTY4ODIxN30.nOFEd8y3kG_IgGhUWEZJBycVw0clhvTZ4wE8Tm0u6yM',
+        { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } }
+      ),
+      SYNC_WORKER_URL: 'https://yandex-sync-worker.margarita-site-gid.workers.dev',
+      ADMIN_TOKEN: 'g3n09g43WG343gjEJg'
+    };
+    console.log('✅ Config loaded');
+  }
+} catch (e) {
+  console.error('💥 Config crash:', e);
+}
